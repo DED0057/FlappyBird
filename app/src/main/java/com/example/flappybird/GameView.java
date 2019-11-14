@@ -56,14 +56,18 @@ public class GameView extends View {
         //set background of the game screen
         background = BitmapFactory.decodeResource(getResources(),R.mipmap.background);
 
-        tubeTop = BitmapFactory.decodeResource(getResources(),R.drawable.tube_top_scaled_down);
-        tubeBottom =  BitmapFactory.decodeResource(getResources(),R.drawable.tube_bottom_scaled_down);
-
         display = ((Activity)getContext()).getWindowManager().getDefaultDisplay();
         point = new Point();
         display.getSize(point);
         dWidth = point.x;
         dHeight = point.y;
+
+        tubeTop = BitmapFactory.decodeResource(getResources(),R.drawable.tube_top_scaled_down);
+        tubeTop = Bitmap.createScaledBitmap(tubeTop,dWidth/6,dHeight,true);
+        tubeBottom =  BitmapFactory.decodeResource(getResources(),R.drawable.tube_bottom_scaled_down);
+        tubeBottom = Bitmap.createScaledBitmap(tubeBottom,dWidth/6,dHeight,true);
+
+
         //initializing rectangle corresponding to the display dimensions
         rect = new Rect(0,0,dWidth,dHeight);
         //create two states of bird
@@ -71,7 +75,7 @@ public class GameView extends View {
         birds[0] = BitmapFactory.decodeResource(getResources(),R.drawable.blue_bird_scaleddown);
         birds[1] = BitmapFactory.decodeResource(getResources(),R.drawable.blue_bird_wingsup_scaleddown);
         //set the bird in the middle of the screen
-        birdXpos = dWidth/2 - birds[0].getWidth()/2;
+        birdXpos = 1;
         birdYpos = dHeight/2 - birds[1].getHeight()/2;
 
         tubeOffset = dWidth*3/4;
