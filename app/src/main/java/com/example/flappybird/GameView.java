@@ -19,7 +19,7 @@ public class GameView extends View {
 
     Handler handler;
     Runnable runnable;
-    final int UPDATE_MILIS=30;
+    final int UPDATE_MILIS=20;
     Bitmap background, tubeTop,tubeBottom;
     Display display;
     Point point;
@@ -30,6 +30,8 @@ public class GameView extends View {
     Bitmap[] birds;
     //temp variable to store bird state (wings down/up)
     int birdState = 0;
+    int birdStateCounter=0;
+    boolean birdWingsUp=false;
     //physics variables
     int velocity=0,gravity=3;
     //storing the birds position
@@ -40,9 +42,10 @@ public class GameView extends View {
     int minTubeOffset,maxTubeOffset;
     int tubeCount = 4;
     int tubeOffset;
-    int tubesXpos;
-    int tubeTopYpos,tubeBottomYpos;
+    int[] tubesXpos = new int[tubeCount] ;
+    int[] tubeTopYpos = new int[tubeCount];
     Random random;
+    int tubeVelocity = 8;
     public GameView(Context context) {
         super(context);
         handler= new Handler();
@@ -71,9 +74,14 @@ public class GameView extends View {
         //initializing rectangle corresponding to the display dimensions
         rect = new Rect(0,0,dWidth,dHeight);
         //create two states of bird
-        birds = new Bitmap[2];
-        birds[0] = BitmapFactory.decodeResource(getResources(),R.drawable.blue_bird_scaleddown);
-        birds[1] = BitmapFactory.decodeResource(getResources(),R.drawable.blue_bird_wingsup_scaleddown);
+        birds = new Bitmap[5];
+        birds[0] = BitmapFactory.decodeResource(getResources(),R.drawable.blue_bird_wingsup_scaleddown);
+       // birds[0] = Bitmap.createScaledBitmap(birds[0],dWidth/6,tubeGap*2/3,true);
+        birds[1] = BitmapFactory.decodeResource(getResources(),R.drawable.blue_bird_wingsup3);
+        birds[2] = BitmapFactory.decodeResource(getResources(),R.drawable.blue_bird_wingsup2);
+        birds[3] = BitmapFactory.decodeResource(getResources(),R.drawable.blue_bird_wingsup1);
+        birds[4] = BitmapFactory.decodeResource(getResources(),R.drawable.blue_bird_scaleddown);
+       // birds[4] = Bitmap.createScaledBitmap(birds[4],dWidth/6,tubeGap*2/3,true);
         //set the bird in the middle of the screen
         birdXpos = 1;
         birdYpos = dHeight/2 - birds[1].getHeight()/2;
@@ -84,9 +92,11 @@ public class GameView extends View {
         maxTubeOffset = dHeight - minTubeOffset - tubeGap;
         //put the first tube in the middle of the screen
         random = new Random();
-        tubesXpos = dWidth / 2 - tubeTop.getWidth()/2;
-        //set the pipes lengths between min and max gap offset
-        tubeTopYpos = minTubeOffset + random.nextInt(maxTubeOffset - minTubeOffset +1);
+        for(int i = 0; i < tubeCount; i++){
+            //start at the right edge of the screen
+            tubesXpos[i] = dWidth + i*tubeOffset;
+            tubeTopYpos[i] = minTubeOffset + random.nextInt(maxTubeOffset - minTubeOffset +1);
+        }
       //  tubeBottomYpos = minTubeOffset + random.nextInt(maxTubeOffset - minTubeOffset +1);
     }
 
@@ -98,10 +108,23 @@ public class GameView extends View {
         canvas.drawBitmap(background,null,rect,null);
         handler.postDelayed(runnable,UPDATE_MILIS);
         //switch between bird images between every display update
-        if(birdState==0){
+       /* if(birdState==0){
             birdState=1;
         }else{
             birdState=0;
+        }*/
+       //creating bird flight animation
+        birdState=birdStateCounter;
+        if(birdStateCounter==4){
+            birdWingsUp=true;
+        }
+        if(birdStateCounter==0){
+            birdWingsUp=false;
+        }
+        if(birdWingsUp){
+            birdStateCounter--;
+        }else{
+            birdStateCounter++;
         }
         if(gameState){
             if((birdYpos< dHeight - birds[0].getHeight()) || velocity<0 ){
@@ -110,10 +133,17 @@ public class GameView extends View {
                 Log.d("birdY:"," "+birdYpos);
             }
             //set the position of the top pipe and draw it. X is the same as bottom pipe. Y is the top of the screen
-
-            canvas.drawBitmap(tubeTop, tubesXpos,tubeTopYpos - tubeTop.getHeight(),null);
-            //set the position of the bottom pipe and draw it. Y is
-            canvas.drawBitmap(tubeBottom,tubesXpos,tubeTopYpos+tubeGap,null);
+            for(int i=0;i<tubeCount;i++) {
+                tubesXpos[i] -= tubeVelocity;
+                //reset the tube, if it reaches the left end of the screen
+                if(tubesXpos[i]<-tubeTop.getWidth()){
+                    tubesXpos[i] += tubeCount * tubeOffset;
+                    tubeTopYpos[i] = minTubeOffset + random.nextInt(maxTubeOffset - minTubeOffset +1);
+                }
+                canvas.drawBitmap(tubeTop, tubesXpos[i], tubeTopYpos[i] - tubeTop.getHeight(), null);
+                //set the position of the bottom pipe and draw it. Y is
+                canvas.drawBitmap(tubeBottom, tubesXpos[i], tubeTopYpos[i] + tubeGap, null);
+            }
             if(birdYpos>dHeight){
                 gameOver();
             }
@@ -129,8 +159,6 @@ public class GameView extends View {
             //make the bird jump by 30 units up
             gameState = true;
             velocity = -30;
-            tubeTopYpos = minTubeOffset + random.nextInt(maxTubeOffset - minTubeOffset +1);
-            //tubeBottomYpos = minTubeOffset + random.nextInt(maxTubeOffset - minTubeOffset +1);
         }
         //return true when user inputs touch event
 
