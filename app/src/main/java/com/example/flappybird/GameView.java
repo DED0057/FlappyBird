@@ -2,19 +2,24 @@ package com.example.flappybird;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.os.VibrationEffect;
 import android.util.Log;
 import android.view.Display;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.os.Handler;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.os.Vibrator;
 
@@ -26,6 +31,9 @@ public class GameView extends View {
 
     Handler handler;
     Runnable runnable;
+    Paint txtPaint;
+    Typeface plainFont;
+    Typeface boldFont;
     final int UPDATE_MILIS=20;
     Bitmap background, tubeTop,tubeBottom;
     Display display;
@@ -39,6 +47,7 @@ public class GameView extends View {
     int birdState = 0;
     int birdStateCounter=0;
     boolean birdWingsUp=false;
+
     //physics variables
     int velocity=0,gravity=3;
     //storing the birds position
@@ -54,6 +63,7 @@ public class GameView extends View {
     Random random;
     int tubeVelocity = 7;
     Vibrator v;
+    int maxScore=0;
 
     //creating rectangles for collision detection
     Rect birdRect,tubeTopRect,tubeBotRect, groundRect;
@@ -97,7 +107,7 @@ public class GameView extends View {
         birdXpos = 1;
         birdYpos = dHeight/2 - birds[1].getHeight()/2;
         birdRect=new Rect(birdXpos,birdYpos,birdXpos+birds[0].getWidth(),birdYpos+birds[0].getHeight());
-        groundRect = new Rect(0,dHeight,dWidth,dHeight+1);
+        groundRect = new Rect(0,dHeight-100,dWidth,dHeight);
         tubeBotRect = new Rect(0,0,0,0);
         tubeTopRect = new Rect(0,0,0,0);
         tubeOffset = dWidth;
@@ -111,6 +121,13 @@ public class GameView extends View {
             tubesXpos[i] = dWidth + i*tubeOffset;
             tubeTopYpos[i] = minTubeOffset + random.nextInt(maxTubeOffset - minTubeOffset +1);
         }
+        txtPaint = new Paint();
+        plainFont = Typeface.create("Arial",Typeface.ITALIC);
+        boldFont = Typeface.create(plainFont,Typeface.BOLD);
+        txtPaint.setColor(Color.WHITE);
+        txtPaint.setStyle(Paint.Style.FILL);
+        txtPaint.setTypeface(boldFont);
+        txtPaint.setTextSize(36);
 
     }
 
@@ -137,6 +154,7 @@ public class GameView extends View {
         }
 
         if(gameState){
+
             if((birdYpos< dHeight - birds[0].getHeight() ) || velocity<0 ){
                 //let the bird fall with incremental speed
                     velocity += gravity;
@@ -149,11 +167,13 @@ public class GameView extends View {
                 if(tubesXpos[i]<-tubeTop.getWidth()){
                     tubesXpos[i] += tubeCount * tubeOffset;
                     tubeTopYpos[i] = minTubeOffset + random.nextInt(maxTubeOffset - minTubeOffset +1);
+                    maxScore++;
                 }
                 //the only random position is for top tube. The bottom tube depends on the top tube.
                 canvas.drawBitmap(tubeTop, tubesXpos[i], tubeTopYpos[i] - tubeTop.getHeight(), null);
                 //set the position of the bottom pipe and draw it. Y is
                 canvas.drawBitmap(tubeBottom, tubesXpos[i], tubeTopYpos[i] + tubeGap, null);
+
             }
             if(CollisionDetection()){
                 gameOver();
@@ -162,8 +182,10 @@ public class GameView extends View {
         //display the bird
         canvas.drawBitmap(birds[birdState],birdXpos,birdYpos,null);
         birdRect.set(birdXpos+50,birdYpos,birdXpos+birds[0].getWidth()-50,birdYpos+birds[0].getHeight()-50);
-       // canvas.drawRect(birdRect,new Paint());
-        Log.d("Bird rect coordinated","Left: "+birdRect.left+" Top:"+birdRect.top+" right: "+birdRect.right+" bottom: "+birdRect.bottom);
+        canvas.drawRect(groundRect,new Paint());
+
+
+        canvas.drawText("Score:"+maxScore,(float)(dWidth/2.0),(float)100.00,txtPaint);
     }
 
     @Override
@@ -183,6 +205,13 @@ public class GameView extends View {
     public void gameOver(){
         v.vibrate(VibrationEffect.createOneShot(50,1));
         Log.d("Game Over","PROHRAL JSI");
+        //display game over screen with score
+        gameState=false;
+        Intent myInt = new Intent(getContext(),MainActivity.class);
+        myInt.putExtra("gameOverConf","Game Over");
+        myInt.putExtra("maxScore",String.valueOf(maxScore));
+        getContext().startActivity(myInt);
+
 
     }
     public static Bitmap RotateBitmap(Bitmap source, float angle)
@@ -192,22 +221,9 @@ public class GameView extends View {
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
     }
     public boolean CollisionDetection(){
-        int tubeBotHeight= tubeBottom.getHeight();
-        int tubeTopHeight = tubeTop.getHeight();
-        int tubeWidth = tubeBottom.getWidth();
-        //birdXpos can't be
-        //if(birdX>=PipeX && birdX<=pipeX+PipeWidth) - bird is inside of the tubes(or in the gap between them)
-        //TODO 1: try a new approach using Rect.intersects
+
         for(int i = 0;i<tubeCount;i++) {
-         //   if ((birdXpos >= tubesXpos[i] && birdXpos <= (tubesXpos[i] + tubeWidth))) {
-                //bird is inside the tube or in the gap
-                //now check the Y axis collision
-                //TODO 1: make sure that the collision counts with the whole bird. not only one pixel
-               /* if((birdYpos <= tubeTopYpos[i]) || (birdYpos >= tubeTopYpos[i]+tubeGap))
-                {
-                    return true;
-                }
-            }*/
+
                //using rectangles
             tubeTopRect.set(tubesXpos[i],0,tubesXpos[i]+tubeTop.getWidth(),tubeTopYpos[i]);
             //Rect(int left, int top, int right, int bottom)
@@ -220,4 +236,5 @@ public class GameView extends View {
 
         return false;
     }
+
 }
