@@ -6,15 +6,21 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.VibrationEffect;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.os.Handler;
+import android.widget.EditText;
+import android.os.Vibrator;
 
 import java.util.Random;
+
+
 
 public class GameView extends View {
 
@@ -39,14 +45,19 @@ public class GameView extends View {
     int birdXpos,birdYpos;
     boolean gameState = false;
     //setting the gab between the top and bottom tube
-    int tubeGap = 500;
+    int tubeGap = 400;
     int minTubeOffset,maxTubeOffset;
     int tubeCount = 4;
     int tubeOffset;
     int[] tubesXpos = new int[tubeCount] ;
     int[] tubeTopYpos = new int[tubeCount];
     Random random;
-    int tubeVelocity = 10;
+    int tubeVelocity = 7;
+    Vibrator v;
+
+    //creating rectangles for collision detection
+    Rect birdRect,tubeTopRect,tubeBotRect, groundRect;
+
     public GameView(Context context) {
         super(context);
         handler= new Handler();
@@ -60,12 +71,13 @@ public class GameView extends View {
         //set background of the game screen
         background = BitmapFactory.decodeResource(getResources(),R.mipmap.background);
 
+        v = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         display = ((Activity)getContext()).getWindowManager().getDefaultDisplay();
         point = new Point();
         display.getSize(point);
         dWidth = point.x;
         dHeight = point.y;
-        
+
        tubeTop = BitmapFactory.decodeResource(getResources(),R.drawable.pipe_bottomnew);
        tubeBottom=BitmapFactory.decodeResource(getResources(),R.drawable.pipe_bottomnew);
         tubeTop = RotateBitmap(tubeTop,180);
@@ -73,20 +85,22 @@ public class GameView extends View {
         tubeBottom = Bitmap.createScaledBitmap(tubeBottom,dWidth/4,dHeight,true);
         //initializing rectangle corresponding to the display dimensions
         rect = new Rect(0,0,dWidth,dHeight);
-        //create two states of bird
+        //create 5 states of bird (seamless animation)
         birds = new Bitmap[5];
         birds[0] = BitmapFactory.decodeResource(getResources(),R.drawable.blue_bird_wingsup_scaleddown);
-       // birds[0] = Bitmap.createScaledBitmap(birds[0],dWidth/6,tubeGap*2/3,true);
         birds[1] = BitmapFactory.decodeResource(getResources(),R.drawable.blue_bird_wingsup3);
         birds[2] = BitmapFactory.decodeResource(getResources(),R.drawable.blue_bird_wingsup2);
         birds[3] = BitmapFactory.decodeResource(getResources(),R.drawable.blue_bird_wingsup1);
         birds[4] = BitmapFactory.decodeResource(getResources(),R.drawable.blue_bird_scaleddown);
-       // birds[4] = Bitmap.createScaledBitmap(birds[4],dWidth/6,tubeGap*2/3,true);
+
         //set the bird in the middle of the screen
         birdXpos = 1;
         birdYpos = dHeight/2 - birds[1].getHeight()/2;
-
-        tubeOffset = dWidth*3/4;
+        birdRect=new Rect(birdXpos,birdYpos,birdXpos+birds[0].getWidth(),birdYpos+birds[0].getHeight());
+        groundRect = new Rect(0,dHeight,dWidth,dHeight+1);
+        tubeBotRect = new Rect(0,0,0,0);
+        tubeTopRect = new Rect(0,0,0,0);
+        tubeOffset = dWidth;
         //tubes have variable length. set the min and max length here
         minTubeOffset = tubeGap/2;
         maxTubeOffset = dHeight - minTubeOffset - tubeGap;
@@ -97,7 +111,7 @@ public class GameView extends View {
             tubesXpos[i] = dWidth + i*tubeOffset;
             tubeTopYpos[i] = minTubeOffset + random.nextInt(maxTubeOffset - minTubeOffset +1);
         }
-      //  tubeBottomYpos = minTubeOffset + random.nextInt(maxTubeOffset - minTubeOffset +1);
+
     }
 
     @Override
@@ -108,11 +122,6 @@ public class GameView extends View {
         canvas.drawBitmap(background,null,rect,null);
         handler.postDelayed(runnable,UPDATE_MILIS);
         //switch between bird images between every display update
-       /* if(birdState==0){
-            birdState=1;
-        }else{
-            birdState=0;
-        }*/
        //creating bird flight animation
         birdState=birdStateCounter;
         if(birdStateCounter==4){
@@ -126,11 +135,12 @@ public class GameView extends View {
         }else{
             birdStateCounter++;
         }
+
         if(gameState){
-            if((birdYpos< dHeight - birds[0].getHeight()) || velocity<0 ){
-                velocity += gravity;
-                birdYpos += velocity;
-                Log.d("birdY:"," "+birdYpos);
+            if((birdYpos< dHeight - birds[0].getHeight() ) || velocity<0 ){
+                //let the bird fall with incremental speed
+                    velocity += gravity;
+                    birdYpos += velocity;
             }
             //set the position of the top pipe and draw it. X is the same as bottom pipe. Y is the top of the screen
             for(int i=0;i<tubeCount;i++) {
@@ -140,16 +150,20 @@ public class GameView extends View {
                     tubesXpos[i] += tubeCount * tubeOffset;
                     tubeTopYpos[i] = minTubeOffset + random.nextInt(maxTubeOffset - minTubeOffset +1);
                 }
+                //the only random position is for top tube. The bottom tube depends on the top tube.
                 canvas.drawBitmap(tubeTop, tubesXpos[i], tubeTopYpos[i] - tubeTop.getHeight(), null);
                 //set the position of the bottom pipe and draw it. Y is
                 canvas.drawBitmap(tubeBottom, tubesXpos[i], tubeTopYpos[i] + tubeGap, null);
             }
-            if(birdYpos>dHeight){
+            if(CollisionDetection()){
                 gameOver();
             }
         }
         //display the bird
         canvas.drawBitmap(birds[birdState],birdXpos,birdYpos,null);
+        birdRect.set(birdXpos+50,birdYpos,birdXpos+birds[0].getWidth()-50,birdYpos+birds[0].getHeight()-50);
+       // canvas.drawRect(birdRect,new Paint());
+        Log.d("Bird rect coordinated","Left: "+birdRect.left+" Top:"+birdRect.top+" right: "+birdRect.right+" bottom: "+birdRect.bottom);
     }
 
     @Override
@@ -167,7 +181,8 @@ public class GameView extends View {
 
     }
     public void gameOver(){
-
+        v.vibrate(VibrationEffect.createOneShot(50,1));
+        Log.d("Game Over","PROHRAL JSI");
 
     }
     public static Bitmap RotateBitmap(Bitmap source, float angle)
@@ -177,6 +192,31 @@ public class GameView extends View {
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
     }
     public boolean CollisionDetection(){
+        int tubeBotHeight= tubeBottom.getHeight();
+        int tubeTopHeight = tubeTop.getHeight();
+        int tubeWidth = tubeBottom.getWidth();
+        //birdXpos can't be
+        //if(birdX>=PipeX && birdX<=pipeX+PipeWidth) - bird is inside of the tubes(or in the gap between them)
+        //TODO 1: try a new approach using Rect.intersects
+        for(int i = 0;i<tubeCount;i++) {
+         //   if ((birdXpos >= tubesXpos[i] && birdXpos <= (tubesXpos[i] + tubeWidth))) {
+                //bird is inside the tube or in the gap
+                //now check the Y axis collision
+                //TODO 1: make sure that the collision counts with the whole bird. not only one pixel
+               /* if((birdYpos <= tubeTopYpos[i]) || (birdYpos >= tubeTopYpos[i]+tubeGap))
+                {
+                    return true;
+                }
+            }*/
+               //using rectangles
+            tubeTopRect.set(tubesXpos[i],0,tubesXpos[i]+tubeTop.getWidth(),tubeTopYpos[i]);
+            //Rect(int left, int top, int right, int bottom)
+            tubeBotRect.set(tubesXpos[i],tubeTopYpos[i]+tubeGap,tubesXpos[i]+tubeBottom.getWidth(),dHeight);
+            if(Rect.intersects(birdRect,tubeBotRect) || Rect.intersects(birdRect,tubeTopRect) || Rect.intersects(birdRect,groundRect)){
+                return true;
+            }
+
+        }
 
         return false;
     }
