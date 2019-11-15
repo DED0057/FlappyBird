@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Log;
@@ -38,14 +39,14 @@ public class GameView extends View {
     int birdXpos,birdYpos;
     boolean gameState = false;
     //setting the gab between the top and bottom tube
-    int tubeGap = 400;
+    int tubeGap = 500;
     int minTubeOffset,maxTubeOffset;
     int tubeCount = 4;
     int tubeOffset;
     int[] tubesXpos = new int[tubeCount] ;
     int[] tubeTopYpos = new int[tubeCount];
     Random random;
-    int tubeVelocity = 8;
+    int tubeVelocity = 10;
     public GameView(Context context) {
         super(context);
         handler= new Handler();
@@ -64,13 +65,12 @@ public class GameView extends View {
         display.getSize(point);
         dWidth = point.x;
         dHeight = point.y;
-
-        tubeTop = BitmapFactory.decodeResource(getResources(),R.drawable.tube_top_scaled_down);
-        tubeTop = Bitmap.createScaledBitmap(tubeTop,dWidth/6,dHeight,true);
-        tubeBottom =  BitmapFactory.decodeResource(getResources(),R.drawable.tube_bottom_scaled_down);
-        tubeBottom = Bitmap.createScaledBitmap(tubeBottom,dWidth/6,dHeight,true);
-
-
+        
+       tubeTop = BitmapFactory.decodeResource(getResources(),R.drawable.pipe_bottomnew);
+       tubeBottom=BitmapFactory.decodeResource(getResources(),R.drawable.pipe_bottomnew);
+        tubeTop = RotateBitmap(tubeTop,180);
+        tubeTop = Bitmap.createScaledBitmap(tubeTop,dWidth/4,dHeight,true);
+        tubeBottom = Bitmap.createScaledBitmap(tubeBottom,dWidth/4,dHeight,true);
         //initializing rectangle corresponding to the display dimensions
         rect = new Rect(0,0,dWidth,dHeight);
         //create two states of bird
@@ -169,5 +169,15 @@ public class GameView extends View {
     public void gameOver(){
 
 
+    }
+    public static Bitmap RotateBitmap(Bitmap source, float angle)
+    {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(angle);
+        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
+    }
+    public boolean CollisionDetection(){
+
+        return false;
     }
 }
