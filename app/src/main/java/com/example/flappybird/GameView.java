@@ -13,21 +13,29 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.VibrationEffect;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.os.Handler;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.os.Vibrator;
+import android.widget.PopupMenu;
 
 import java.util.Random;
-
+import java.util.Timer;
 
 
 public class GameView extends View {
+
+    private boolean pause_flg = false;
+    private Timer timer;
 
     Handler handler;
     Runnable runnable;
@@ -70,6 +78,7 @@ public class GameView extends View {
 
     public GameView(Context context) {
         super(context);
+        timer = new Timer();
         handler= new Handler();
         runnable = new Runnable() {
             @Override
@@ -80,7 +89,6 @@ public class GameView extends View {
         };
         //set background of the game screen
         background = BitmapFactory.decodeResource(getResources(),R.mipmap.background);
-
         v = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         display = ((Activity)getContext()).getWindowManager().getDefaultDisplay();
         point = new Point();
@@ -109,7 +117,7 @@ public class GameView extends View {
         birdXpos = 1;
         birdYpos = dHeight/2 - birds[1].getHeight()/2;
         birdRect=new Rect(birdXpos,birdYpos,birdXpos+birds[0].getWidth(),birdYpos+birds[0].getHeight());
-        groundRect = new Rect(0,dHeight-350,dWidth,dHeight);
+        groundRect = new Rect(0,dHeight-300,dWidth,dHeight);
         tubeBotRect = new Rect(0,0,0,0);
         tubeTopRect = new Rect(0,0,0,0);
         tubeOffset = dWidth;
@@ -132,6 +140,7 @@ public class GameView extends View {
         txtPaint.setTextSize(36);
 
     }
+
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -238,6 +247,33 @@ public class GameView extends View {
         }
 
         return false;
+    }
+    PhoneStateListener phoneStateListener = new PhoneStateListener(){
+        @Override
+        public void onCallStateChanged(int state, String phoneNumber) {
+            if(state== TelephonyManager.CALL_STATE_RINGING){
+                //phonecall inc. -> pause game
+
+
+            }
+            if(state== TelephonyManager.CALL_STATE_IDLE){
+                //no phone call -> resume game
+            }
+            if(state== TelephonyManager.CALL_STATE_OFFHOOK){}
+            super.onCallStateChanged(state, phoneNumber);
+        }
+    };
+    public void pause(){
+
+            if(pause_flg==false){
+                pause_flg = true;
+                timer.cancel();
+                timer=null;
+
+
+            }else{
+
+            }
     }
 
 }

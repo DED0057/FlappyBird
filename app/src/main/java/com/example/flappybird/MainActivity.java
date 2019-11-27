@@ -1,15 +1,24 @@
 package com.example.flappybird;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.PopupMenu;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
+    boolean GAME_OVER=false;
+    Intent tempIntent;
+    //handling pause
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,16 +42,31 @@ public class MainActivity extends AppCompatActivity {
             maxScoretxt.setText("Your Score: " + maxScore);
 
             playText.setText("PLAY AGAIN");
+            GAME_OVER=true;
 
         }
         highScoreTxt.setText("Highscore: "+myScore.highScore(getBaseContext()));
 
     }
     public void startGame(View view){
-        Intent myIntent = new Intent(this, StartGame.class);
-        startActivity(myIntent);
-        finish();
+
+        if(GAME_OVER){
+            startActivity(tempIntent);
+            finish();
+        }
+        else{
+            Intent myIntent = new Intent(this, StartGame.class);
+            tempIntent = myIntent;
+            startActivity(myIntent);
+            finish();
+            GAME_OVER=false;
+        }
+
     }
+
+
+
+
 
 
 }
