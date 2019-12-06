@@ -33,7 +33,8 @@ import java.util.Timer;
 
 public class GameView extends View {
 
-    private boolean pause_flg = false;
+    private static boolean pause_flg = false;
+    public static boolean gameActive = false;
     private Timer timer;
 
     Handler handler;
@@ -82,6 +83,7 @@ public class GameView extends View {
             @Override
             public void run() {
                 //call onDraw()
+                //if(!is_paused())
                 invalidate();
             }
         };
@@ -142,12 +144,17 @@ public class GameView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        gameActive = true;
         super.onDraw(canvas);
         //draw background
         // canvas.drawBitmap(background,0,0,null);
-        canvas.drawBitmap(background,null,rect,null);
 
+        canvas.drawBitmap(background,null,rect,null);
+        canvas.drawText("Score:"+maxScore+is_paused(),(float)(dWidth/2.0),(float)100.00,txtPaint);
+        if(!is_paused())
         handler.postDelayed(runnable,UPDATE_MILIS);
+        //do{handler.postDelayed(runnable,UPDATE_MILIS);}while(is_paused()!=true);
+
         //switch between bird images between every display update
         //creating bird flight animation
         birdState=birdStateCounter;
@@ -199,7 +206,7 @@ public class GameView extends View {
         //canvas.drawRect(groundRect,new Paint());
 
         canvas.drawBitmap(ground,0,dHeight-350,null);
-        canvas.drawText("Score:"+maxScore,(float)(dWidth/2.0),(float)100.00,txtPaint);
+
     }
 
     @Override
@@ -252,52 +259,19 @@ public class GameView extends View {
 
         return false;
     }
-    PhoneStateListener phoneStateListener = new PhoneStateListener(){
-        @Override
-        public void onCallStateChanged(int state, String phoneNumber) {
-            if(state== TelephonyManager.CALL_STATE_RINGING){
-                //phonecall inc. -> pause game
 
-
-            }
-            if(state== TelephonyManager.CALL_STATE_IDLE){
-                //no phone call -> resume game
-            }
-            if(state== TelephonyManager.CALL_STATE_OFFHOOK){}
-            super.onCallStateChanged(state, phoneNumber);
-        }
-    };
-    public void pause(){
-
-        if(pause_flg==false){
-            pause_flg = true;
-            timer.cancel();
-            timer=null;
-
-
-        }else{
-
-        }
+    public boolean is_paused(){
+        return pause_flg;
     }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-       /* try {
-            runnable.wait();
-            runnable=null;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }*/
+    public void pause() throws InterruptedException {
+        //ondraw will not be called till the user presses resume button
+        pause_flg=true;
     }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        Toast toast = Toast.makeText(getContext(), "welcome back", Toast.LENGTH_LONG);
-        toast.show();
-
-        //runnable=null;
-       // runnable.run();
+    public void resume(){
+        //reset ondraw and resume the game
+        invalidate();
+        pause_flg=false;
     }
+    public static boolean getGameActive(){return gameActive;}
+
 }
