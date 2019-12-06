@@ -5,7 +5,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.view.MenuItem;
@@ -19,9 +21,10 @@ public class MainActivity extends AppCompatActivity {
     boolean GAME_OVER=false;
     Intent tempIntent;
     //handling pause
-
+    MediaPlayer mediaPlayer;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //mediaPlayer = MediaPlayer.create(this,);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Score myScore = new Score();
