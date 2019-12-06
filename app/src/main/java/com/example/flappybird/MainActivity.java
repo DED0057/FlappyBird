@@ -1,30 +1,34 @@
 package com.example.flappybird;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+<<<<<<< HEAD
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+=======
+>>>>>>> parent of 20f9643... #ADD pause menu and edit ground sprite
 import android.view.View;
 import android.widget.EditText;
-import android.widget.PopupMenu;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
+<<<<<<< HEAD
     boolean GAME_OVER=false;
     Intent tempIntent;
     Thread myThread;
     StartGame myGame;
     boolean isActive;
+=======
+
+>>>>>>> parent of 20f9643... #ADD pause menu and edit ground sprite
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,13 +51,13 @@ public class MainActivity extends AppCompatActivity {
             maxScoretxt.setText("Your Score: " + maxScore);
 
             playText.setText("PLAY AGAIN");
-            GAME_OVER=true;
 
         }
         highScoreTxt.setText("Highscore: "+myScore.highScore(getBaseContext()));
 
     }
     public void startGame(View view){
+<<<<<<< HEAD
         isActive=true;
                 if(GAME_OVER){
                     startActivity(tempIntent);
@@ -70,6 +74,11 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+=======
+        Intent myIntent = new Intent(this, StartGame.class);
+        startActivity(myIntent);
+        finish();
+>>>>>>> parent of 20f9643... #ADD pause menu and edit ground sprite
     }
 
     @Override
@@ -77,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
     }
 
+<<<<<<< HEAD
    /* @Override
     protected void onPause() {
         super.onPause();
@@ -120,4 +130,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+=======
+>>>>>>> parent of 20f9643... #ADD pause menu and edit ground sprite
 }
