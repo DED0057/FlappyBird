@@ -220,6 +220,7 @@ public class GameView extends View {
         myInt.putExtra("gameOverConf","Game Over");
         myInt.putExtra("maxScore",String.valueOf(maxScore));
         getContext().startActivity(myInt);
+        System.exit(0);
 
 
     }
