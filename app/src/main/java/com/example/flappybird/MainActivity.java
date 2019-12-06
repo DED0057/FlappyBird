@@ -31,7 +31,9 @@ public class MainActivity extends AppCompatActivity {
         playText.setText("PLAY");
 
         if((gameOver!=null) && (maxScore!=null)) {
-            musicManager.start(this, R.raw.gameover_sound);
+            musicManager.release();
+            musicManager.start(this, R.raw.gameover_sound,false);
+
             if(Integer.parseInt(maxScore)>myScore.highScore(getBaseContext())){
                 myScore.storeHighScore(getBaseContext(),Integer.parseInt(maxScore));
             }
@@ -47,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
     public void startGame(View view){
-        //musicManager.start(this,R.raw.background_music_takeonme);
+
         if(GAME_OVER){
             startActivity(tempIntent);
             finish();
@@ -73,12 +75,5 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         continueBGMusic=false;
-       /* if(GAME_OVER){
-            musicManager.start(this,R.raw.gameover_sound);
-        }
-        else{
-            MusicManager.start(this,R.raw.background_music_takeonme);
-        }*/
     }
-    public static MusicManager getMusicManager(){return musicManager;}
 }

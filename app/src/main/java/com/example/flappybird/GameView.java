@@ -83,18 +83,19 @@ public class GameView extends View {
             @Override
             public void run() {
                 //call onDraw()
-                //if(!is_paused())
+                if(!is_paused())
                 invalidate();
             }
         };
-        //set background of the game screen
-        background = BitmapFactory.decodeResource(getResources(),R.mipmap.background);
 
         display = ((Activity)getContext()).getWindowManager().getDefaultDisplay();
         point = new Point();
         display.getSize(point);
         dWidth = point.x;
         dHeight = point.y;
+        //set background of the game screen
+
+        background = BitmapFactory.decodeResource(getResources(),R.mipmap.background);
 
         tubeTop = BitmapFactory.decodeResource(getResources(),R.drawable.pipe_bottomnew);
         tubeBottom=BitmapFactory.decodeResource(getResources(),R.drawable.pipe_bottomnew);
@@ -144,14 +145,13 @@ public class GameView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        gameActive = true;
         super.onDraw(canvas);
-        //draw background
-        // canvas.drawBitmap(background,0,0,null);
-
+        gameActive = true;
+        Paint bgpaint = new Paint();
+        bgpaint.setColor(Color.BLACK);
+        canvas.drawRect(0,0,dWidth,dHeight,bgpaint);
         canvas.drawBitmap(background,null,rect,null);
         canvas.drawText("Score:"+maxScore+is_paused(),(float)(dWidth/2.0),(float)100.00,txtPaint);
-        if(!is_paused())
         handler.postDelayed(runnable,UPDATE_MILIS);
         //do{handler.postDelayed(runnable,UPDATE_MILIS);}while(is_paused()!=true);
 
@@ -193,17 +193,14 @@ public class GameView extends View {
 
             }
             if(CollisionDetection()){
-                try {
+
                     gameOver();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+
             }
         }
         //display the bird
         canvas.drawBitmap(birds[birdState],birdXpos,birdYpos,null);
         birdRect.set(birdXpos+50,birdYpos,birdXpos+birds[0].getWidth()-50,birdYpos+birds[0].getHeight()-50);
-        //canvas.drawRect(groundRect,new Paint());
 
         canvas.drawBitmap(ground,0,dHeight-350,null);
 
@@ -223,7 +220,7 @@ public class GameView extends View {
 
 
     }
-    public void gameOver() throws InterruptedException {
+    public void gameOver() {
 
         Log.d("Game Over","PROHRAL JSI");
         //display game over screen with score
@@ -234,6 +231,7 @@ public class GameView extends View {
         getContext().startActivity(myInt);
         handler.removeCallbacksAndMessages(null);
         handler = null;
+
 
 
     }
@@ -249,7 +247,7 @@ public class GameView extends View {
 
             //using rectangles
             tubeTopRect.set(tubesXpos[i],0,tubesXpos[i]+tubeTop.getWidth(),tubeTopYpos[i]);
-            //Rect(int left, int top, int right, int bottom)
+
             tubeBotRect.set(tubesXpos[i],tubeTopYpos[i]+tubeGap,tubesXpos[i]+tubeBottom.getWidth(),dHeight);
             if(Rect.intersects(birdRect,tubeBotRect) || Rect.intersects(birdRect,tubeTopRect) || Rect.intersects(birdRect,groundRect)){
                 return true;

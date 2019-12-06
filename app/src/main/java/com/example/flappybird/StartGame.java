@@ -32,6 +32,7 @@ public class StartGame extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
+        isPaused=true;
         if (!continueBGMusic)
             musicManager.pause();
         if(gameView.getGameActive()) {
@@ -47,12 +48,14 @@ public class StartGame extends Activity {
     protected void onResume() {
         super.onResume();
         continueBGMusic = false;
-        musicManager.start(this, R.raw.background_music_takeonme);
+        if(isPaused)
+        musicManager.start(this, R.raw.background_music_takeonme,true);
+        else musicManager.start(this, R.raw.background_music_takeonme,false);
         //onResume is called even when starting the game. Get around that.
         if(gameView.getGameActive()) {
-            //gameView.resume();
             showPopup(gameView);
         }
+
     }
 
     public void showPopup(View v) {
@@ -61,6 +64,7 @@ public class StartGame extends Activity {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 gameView.resume();
+                isPaused=false;
                 return false;
             }
         });
@@ -68,10 +72,5 @@ public class StartGame extends Activity {
         inflater.inflate(R.menu.pause_menu, popup.getMenu());
         popup.show();
     }
-
-public boolean isPaused(){
-        return isPaused;
-    }
-
 
 }
