@@ -21,7 +21,7 @@ public class GameView extends View {
     Handler handler;
     Runnable runnable;
     final int UPDATE_MILIS=20;
-    Bitmap background, tubeTop,tubeBottom;
+    Bitmap background, tubeTop,tubeBottom,ground;
     Display display;
     Point point;
     Rect rect;
@@ -71,6 +71,8 @@ public class GameView extends View {
         tubeTop = RotateBitmap(tubeTop,180);
         tubeTop = Bitmap.createScaledBitmap(tubeTop,dWidth/4,dHeight,true);
         tubeBottom = Bitmap.createScaledBitmap(tubeBottom,dWidth/4,dHeight,true);
+        ground = BitmapFactory.decodeResource(getResources(),R.drawable.ground);
+        ground = Bitmap.createScaledBitmap(ground,dWidth,400,true);
         //initializing rectangle corresponding to the display dimensions
         rect = new Rect(0,0,dWidth,dHeight);
         //create two states of bird
@@ -85,8 +87,16 @@ public class GameView extends View {
         //set the bird in the middle of the screen
         birdXpos = 1;
         birdYpos = dHeight/2 - birds[1].getHeight()/2;
+<<<<<<< HEAD
 
         tubeOffset = dWidth*3/4;
+=======
+        birdRect=new Rect(birdXpos,birdYpos,birdXpos+birds[0].getWidth(),birdYpos+birds[0].getHeight());
+        groundRect = new Rect(0,dHeight-350,dWidth,dHeight);
+        tubeBotRect = new Rect(0,0,0,0);
+        tubeTopRect = new Rect(0,0,0,0);
+        tubeOffset = dWidth;
+>>>>>>> parent of 7c5e9d9... Revert "#ADD ground sprite and ground collision"
         //tubes have variable length. set the min and max length here
         minTubeOffset = tubeGap/2;
         maxTubeOffset = dHeight - minTubeOffset - tubeGap;
@@ -106,6 +116,7 @@ public class GameView extends View {
         //draw background
        // canvas.drawBitmap(background,0,0,null);
         canvas.drawBitmap(background,null,rect,null);
+
         handler.postDelayed(runnable,UPDATE_MILIS);
         //switch between bird images between every display update
        /* if(birdState==0){
@@ -150,6 +161,15 @@ public class GameView extends View {
         }
         //display the bird
         canvas.drawBitmap(birds[birdState],birdXpos,birdYpos,null);
+<<<<<<< HEAD
+=======
+        birdRect.set(birdXpos+50,birdYpos,birdXpos+birds[0].getWidth()-50,birdYpos+birds[0].getHeight()-50);
+        //canvas.drawRect(groundRect,new Paint());
+
+        canvas.drawBitmap(ground,0,dHeight-350,null);
+        canvas.drawText("Score:"+maxScore,(float)(dWidth/2.0),(float)100.00,txtPaint);
+        if(maxScore==5) pause_flg=true;
+>>>>>>> parent of 7c5e9d9... Revert "#ADD ground sprite and ground collision"
     }
 
     @Override
