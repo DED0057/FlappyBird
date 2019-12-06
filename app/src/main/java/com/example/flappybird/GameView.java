@@ -198,6 +198,7 @@ public class GameView extends View {
 
         canvas.drawBitmap(ground,0,dHeight-350,null);
         canvas.drawText("Score:"+maxScore,(float)(dWidth/2.0),(float)100.00,txtPaint);
+        if(maxScore==5) pause_flg=true;
     }
 
     @Override
@@ -263,17 +264,15 @@ public class GameView extends View {
             super.onCallStateChanged(state, phoneNumber);
         }
     };
-    public void pause(){
+    public boolean getPause(){
 
-            if(pause_flg==false){
-                pause_flg = true;
+            if(pause_flg==true){
                 timer.cancel();
                 timer=null;
-
-
-            }else{
-
+                return true;
             }
+            return false;
     }
+
 
 }
