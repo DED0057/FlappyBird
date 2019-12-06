@@ -25,6 +25,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.PopupMenu;
+import android.widget.Toast;
 
 import java.util.Random;
 import java.util.Timer;
@@ -185,7 +186,11 @@ public class GameView extends View {
 
             }
             if(CollisionDetection()){
-                gameOver();
+                try {
+                    gameOver();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
         //display the bird
@@ -211,7 +216,7 @@ public class GameView extends View {
 
 
     }
-    public void gameOver(){
+    public void gameOver() throws InterruptedException {
 
         Log.d("Game Over","PROHRAL JSI");
         //display game over screen with score
@@ -220,7 +225,8 @@ public class GameView extends View {
         myInt.putExtra("gameOverConf","Game Over");
         myInt.putExtra("maxScore",String.valueOf(maxScore));
         getContext().startActivity(myInt);
-        System.exit(0);
+        handler.removeCallbacksAndMessages(null);
+        handler = null;
 
 
     }
@@ -274,4 +280,24 @@ public class GameView extends View {
         }
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+       /* try {
+            runnable.wait();
+            runnable=null;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }*/
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        Toast toast = Toast.makeText(getContext(), "welcome back", Toast.LENGTH_LONG);
+        toast.show();
+
+        //runnable=null;
+       // runnable.run();
+    }
 }
