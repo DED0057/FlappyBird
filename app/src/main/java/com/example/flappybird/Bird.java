@@ -5,9 +5,8 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 /*
 *this class represents the player (bird). It extends the assets class ,which means it has it's own bitmap.
-* This class implements the Updatable interface, which means that it's a game objects, that moves or changes its state/position
 * */
-public class Bird extends Assets implements Updatable {
+public class Bird extends Assets {
     private int birdXpos;
     private int birdYpos;
     private boolean wingsUp;
@@ -36,13 +35,19 @@ public class Bird extends Assets implements Updatable {
         gravity = 3;
         isFalling = false;
     }
-    @Override
+
     public void update() {
         //TODO update the xpos+ypos of the bird
         this.setVelocity(this.getVelocity()+this.getGravity());
         this.birdYpos = this.birdYpos + this.getVelocity();
 
     }
+
+
+    public void reset() {
+
+    }
+
     public int getBirdXpos(){
         return birdXpos;
     }

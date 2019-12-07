@@ -7,7 +7,7 @@ import android.graphics.Matrix;
 import android.graphics.Rect;
 
 public abstract class Assets{
-   private  static Bitmap bitmap;
+   private Bitmap bitmap;
     Rect CollisionRect;
 
     Assets(Resources resources, int filepath){
@@ -17,16 +17,18 @@ public abstract class Assets{
         return bitmap;
     }
 
-    public static Bitmap rotate(float angle){
+    public void rotate(float angle){
         Matrix matrix = new Matrix();
         matrix.postRotate(angle);
-        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+        this.bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
     }
 
-    public static void setBitmap(Bitmap bitmap) {
-        Assets.bitmap = bitmap;
+    public void setBitmap(Bitmap bitmap) {
+        this.bitmap = bitmap;
     }
-
+    public void scaleBitmap(int width,int height){
+        this.setBitmap( Bitmap.createScaledBitmap(this.getBitmap(),width,height,true));
+    }
     public void setCollisionRect(Rect collisionRect) {
         CollisionRect = collisionRect;
     }
@@ -40,8 +42,8 @@ public abstract class Assets{
     public int getWidth(){
         return this.getBitmap().getWidth();
     }
-    public boolean checkForCollisions(Assets opposition){
-        //check for collisions with opposition rectangle
+    public boolean checkForCollisions(Rect r){
+        if(this.CollisionRect.intersect(r)) return true;
         return false;
     }
 }
