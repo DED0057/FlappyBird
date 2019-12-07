@@ -39,6 +39,10 @@ public class PipeManager {
 
     }
 
+    /**
+     * moves the pipes to the left by their velocity.
+     * They are reset if they go out of the view. Y axis is random. X is end of the display
+     */
     public void update() {
     //update top and bottom pipes
         this.setXpos(this.getXpos()-pipeVelocity);
@@ -56,6 +60,11 @@ public class PipeManager {
         this.bottomPipe.setCollisionRect( new Rect( getXpos(),getYpos()+getPipeGap(),getXpos()+bottomPipe.getWidth(),dHeight ) );
         this.topPipe.setCollisionRect( new Rect( getXpos(),0,getXpos()+topPipe.getWidth(),getYpos() ) );
     }
+
+    /**
+     * check if a set of pipes is out of the view
+     * @return boolean
+     */
     public boolean isOffScreen(){
 
         if(this.getXpos() < -topPipe.getWidth()){
@@ -65,6 +74,10 @@ public class PipeManager {
         return false;
     }
 
+    /**
+     * initial reset when the game loads
+     * @param offsetMultiplier
+     */
     public void reset(int offsetMultiplier){
         this.setXpos((getPipeOffset()*offsetMultiplier));
         this.setYpos(minTubeOffset+random.nextInt(maxTubeOffset-minTubeOffset+1));
@@ -99,9 +112,6 @@ public class PipeManager {
     public void setYpos(int yPos){
         this.topPipe.setyPos(yPos);
     }
-    /**
-     * sets the starting parameters to the pipes
-     */
 
     public static int getPipeOffset() {
         return pipeOffset;

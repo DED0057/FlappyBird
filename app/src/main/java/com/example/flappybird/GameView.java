@@ -1,3 +1,12 @@
+/*
+ * *
+ *  * Created by Matyas Dedek (DED0057)
+ *  * 2019 .
+ *  * Last modified 7.12.19 23:19
+ *
+ *
+ */
+
 package com.example.flappybird;
 
 import android.annotation.SuppressLint;
@@ -64,16 +73,16 @@ public class GameView extends View {
     int tubeOffset;
 
     //pipemanager handles pipe updates and other stuff
-    //PipeManager pipeManager;
     PipeManager[] pipeManagers;
-
-
 
     public GameView(Context context) {
         super(context);
 
         handler= new Handler();
         runnable = new Runnable() {
+            /**
+             * Handles game screen updates and pausing
+             */
             @Override
             public void run() {
                 //check if game is not paused
@@ -82,6 +91,9 @@ public class GameView extends View {
             }
         };
         runnable2 = new Runnable() {
+            /**
+             * Starts collision detection on another thread
+             */
             @Override
             public void run() {
                 if(CollisionDetection()) gameover=true;
@@ -124,7 +136,7 @@ public class GameView extends View {
         txtPaint.setColor(Color.WHITE);
         txtPaint.setStyle(Paint.Style.FILL);
         txtPaint.setTypeface(boldFont);
-        txtPaint.setTextSize(36);
+        txtPaint.setTextSize(72);
 
     }
 
@@ -160,7 +172,7 @@ public class GameView extends View {
         // 30 is the offset, so the game is a bit easier. it means that 50pixels from each side wont count in collision calculation
         bird.setCollisionRect(30);
         canvas.drawBitmap(ground.getBitmap(),0,dHeight-ground.getHeight()+50,null);
-        canvas.drawText("Score:"+score.getCurrentScore(),(float)(dWidth/2.0),(float)100.00,txtPaint);
+        canvas.drawText("Score:"+score.getCurrentScore(),20,dHeight-50,txtPaint);
     }
 
 
@@ -177,6 +189,9 @@ public class GameView extends View {
         return true;
     }
 
+    /**
+     * Sets the game to gameover and manages handler disposal
+     */
     public void gameOver() {
 
         Log.d("Game Over","PROHRAL JSI");
@@ -185,11 +200,16 @@ public class GameView extends View {
         Intent myInt = new Intent(getContext(),MainActivity.class);
         myInt.putExtra("gameOverConf","Game Over");
         myInt.putExtra("maxScore",String.valueOf(score.getCurrentScore()));
+        score.checkForNewHighscore(getContext());
         getContext().startActivity(myInt);
         handler.removeCallbacksAndMessages(null);
         handler = null;
     }
 
+    /**
+     * Collision detection that compares intersects of rectangles. Each game element has it's own corresponding rectangle
+     * @return boolean
+     */
     public boolean CollisionDetection(){
             //collides with the ground
         for(PipeManager pm:pipeManagers){
@@ -204,13 +224,26 @@ public class GameView extends View {
         return false;
     }
 
+    /**
+     * Checking whether the game is in pause
+     * @return boolean
+     */
     public boolean is_paused(){
         return pause_flg;
     }
+
+    /**
+     * handles the actual pausing
+     * @throws InterruptedException
+     */
     public void pause() throws InterruptedException {
         //ondraw will not be called till the user presses resume button
         pause_flg=true;
     }
+
+    /**
+     * handles resuming of the game and calling onDraw to get the runnable starting again
+     */
     public void resume(){
         //reset ondraw and resume the game
         invalidate();

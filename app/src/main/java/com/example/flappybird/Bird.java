@@ -1,15 +1,26 @@
+/*
+ * *
+ *  * Created by Matyas Dedek (DED0057)
+ *  * 2019 .
+ *  * Last modified 7.12.19 23:17
+ *
+ *
+ */
+
 package com.example.flappybird;
 
 import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.util.Log;
 
-import java.util.ArrayList;
 
 /*
 *this class represents the player (bird). It extends the assets class ,which means it has it's own bitmap.
 * */
+
+/**
+ * Represents the player (bird) sprite.
+ */
 public class Bird extends Assets {
     private int birdXpos;
     private int birdYpos;
@@ -35,6 +46,9 @@ public class Bird extends Assets {
         isFalling=false;
     }
 
+    /**
+     * Updates the bird's position
+     */
     public void update() {
         //bird is falling - make him rotate down
         Log.d("birdX:","x:"+getBirdXpos());
@@ -44,10 +58,17 @@ public class Bird extends Assets {
         isFalling=true;
     }
 
+    /**
+     * Check whether the bird is in falling state
+     * @return boolean
+     */
     public boolean isFalling() {
         return isFalling;
     }
 
+    /**
+     * Make the bird jump up by changing it's velocity to a negative number (y-30 is up)
+     */
     public void makeJump() {
         setVelocity(-30);
         isFalling=false;
@@ -61,31 +82,60 @@ public class Bird extends Assets {
         return birdYpos;
     }
 
+    /**
+     * useless
+     * @param birdXpos
+     */
     public void setBirdXpos(int birdXpos) {
         this.birdXpos = birdXpos;
     }
-
+    /**
+     * useless
+     * @param birdYpos
+     */
     public void setBirdYpos(int birdYpos) {
         this.birdYpos = birdYpos;
     }
 
+    /**
+     * useless
+     * @param xpos
+     * @param ypos
+     */
     public void setPosition(int xpos,int ypos){
         this.birdXpos = xpos;
         this.birdYpos = ypos;
     }
 
+    /**
+     * useless
+     * @param wingsUp
+     */
     public void setWingsUp(boolean wingsUp) {
         this.wingsUp = wingsUp;
     }
 
+    /**
+     * useless
+     * @return boolean
+     */
     public boolean isWingsUp() {
         return wingsUp;
     }
-    //create custom collision rectangle
+
+    /**
+     * sets the rectangle around the bird sprite. This rectangle is then used in collision detection.
+     */
     public void setCollisionRect() {
         Rect birdRect=new Rect(this.birdXpos,this.birdYpos,this.birdXpos+this.getBitmap().getWidth(),birdYpos+this.getBitmap().getHeight());
         super.setCollisionRect(birdRect);
     }
+
+    /**
+     * sets the rectangle around the bird sprite. This rectangle is then used in collision detection.
+     * Offset represents how much of the bird can come into contact with another rectangle and not make the player lose.
+     * @param offset
+     */
     public void setCollisionRect(int offset) {
         Rect birdRect=new Rect(birdXpos+offset,birdYpos,birdXpos+this.getBitmap().getWidth()-50,birdYpos+this.getBitmap().getHeight()-offset);
         super.setCollisionRect(birdRect);
@@ -106,6 +156,12 @@ public class Bird extends Assets {
     public void setVelocity(int velocity) {
         this.velocity = velocity;
     }
+
+    /**
+     * check whether the bird sprite is in view
+     * @param dHeight
+     * @return boolean
+     */
     public boolean birdIsOnScreen(int dHeight){
         if((birdYpos< dHeight - this.getHeight()) || this.getVelocity()<0 ){
             return true;

@@ -1,3 +1,12 @@
+/*
+ * *
+ *  * Created by Matyas Dedek (DED0057)
+ *  * 2019 .
+ *  * Last modified 7.12.19 23:17
+ *
+ *
+ */
+
 package com.example.flappybird;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,9 +43,9 @@ public class MainActivity extends AppCompatActivity {
             musicManager.release();
             musicManager.start(this, R.raw.gameover_sound,false);
 
-            if(Integer.parseInt(maxScore)>myScore.highScore(getBaseContext())){
+          /*  if(Integer.parseInt(maxScore)>myScore.highScore(getBaseContext())){
                 myScore.storeHighScore(getBaseContext(),Integer.parseInt(maxScore));
-            }
+            }*/
             gameoverTxt.setText(gameOver);
             maxScoretxt.setText("Your Score: " + maxScore);
 
@@ -48,6 +57,12 @@ public class MainActivity extends AppCompatActivity {
         highScoreTxt.setText("Highscore: "+myScore.highScore(getBaseContext()));
 
     }
+
+    /**
+     *creates Intent or uses the previous if it's an another run. Starts a new Activity in StartGame.
+     * finish is called after every activity start, co you can't go back via back-button
+     * @param view
+     */
     public void startGame(View view){
 
         if(GAME_OVER){
@@ -60,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
             startActivity(myIntent);
             finish();
             GAME_OVER=false;
-        }
+       }
 
     }
 

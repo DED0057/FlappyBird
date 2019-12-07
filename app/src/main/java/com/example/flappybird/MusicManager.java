@@ -1,9 +1,21 @@
+/*
+ * *
+ *  * Created by Matyas Dedek (DED0057)
+ *  * 2019 .
+ *  * Last modified 7.12.19 23:23
+ *
+ *
+ */
+
 package com.example.flappybird;
 
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.util.Log;
 
+/**
+ * Handles music
+ */
 public class MusicManager {
     static MediaPlayer mp;
     static boolean isActive;
@@ -12,8 +24,16 @@ public class MusicManager {
     private static int currentMusic=-1;
     private static int currentPosition = -1;
 
+    /**
+     * make the music start playing.
+     * Resume is true if the music has been paused and you want to resume from the previous time.
+     * @param context
+     * @param music
+     * @param resume
+     */
     public static void start(Context context, int music,boolean resume){
         if(resume) {
+            //play from the previous point
             mp.seekTo(currentPosition);
             mp.start();
         }else {
@@ -22,12 +42,14 @@ public class MusicManager {
                 pause();
 
                 if (mp != null) {
+                    //music player has been initialized
                     if (!mp.isPlaying()) {
                         mp.start();
                         currentMusic = music;
                     }
                 } else {
-                    mp = MediaPlayer.create(context, gameplayMusic); //Ur BackGround Music
+                    //music player hasn't been initialized
+                    mp = MediaPlayer.create(context, gameplayMusic); //BackGround Music
                     currentMusic = gameplayMusic;
                 }
                 if (mp == null) {
@@ -55,6 +77,10 @@ public class MusicManager {
         }
 
     }
+
+    /**
+     * pauses the current track
+     */
     public static void pause(){
         if(mp != null){
             if(mp.isPlaying()){
@@ -63,6 +89,10 @@ public class MusicManager {
             }
         }
     }
+
+    /**
+     * stop and release the music player
+     */
     public static void release(){
         try{
             if(mp!=null){

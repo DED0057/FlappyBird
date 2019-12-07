@@ -1,3 +1,12 @@
+/*
+ * *
+ *  * Created by Matyas Dedek (DED0057)
+ *  * 2019 .
+ *  * Last modified 7.12.19 22:55
+ *
+ *
+ */
+
 package com.example.flappybird;
 
 import android.app.Activity;
@@ -29,6 +38,9 @@ public class StartGame extends Activity {
         gameActive=true;
     }
 
+    /**
+     * Manages pause of the music, when user leaves the game
+     */
     @Override
     protected void onPause() {
         super.onPause();
@@ -44,6 +56,9 @@ public class StartGame extends Activity {
         }
     }
 
+    /**
+     * Manages start of the music when user returns to the game
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -58,6 +73,10 @@ public class StartGame extends Activity {
 
     }
 
+    /**
+     * shows popup menu when the user returns to the game
+     * @param v
+     */
     public void showPopup(View v) {
         PopupMenu popup = new PopupMenu(this, v);
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
