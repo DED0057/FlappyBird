@@ -8,5 +8,7 @@ DED0057 - 2D Flappy Bird-esque game
 #FEATURES:
 - Audio tracks accompanying the gameplay.
 - 2D bitmap graphics on canvas
+- Basic animations
 - Player dependant high score storing.
 - Implementing motion events and gestures
+- Resume button when on focus loss
