@@ -44,12 +44,9 @@ public class GameView extends View {
     Paint txtPaint;
     Typeface plainFont;
     Typeface boldFont;
-    final int UPDATE_MILIS=20;
-    Bitmap tubeTop,tubeBottom;
-
+    final int UPDATE_MILIS=15;
     Display display;
     Point point;
-    Rect rect;
     //device width and height
     int dWidth, dHeight;
     //game objects(Assets)
@@ -58,23 +55,19 @@ public class GameView extends View {
     Ground ground;
     Score score;
     boolean gameState = false;
-    //setting the gab between the top and bottom tube
-    //deprecated - all is set in pipemanager
+
+    //setting the gap between the top and bottom tube
     int tubeGap = 400;
     int minTubeOffset,maxTubeOffset;
-    int tubeCount = 2;
-    int tubeVelocity = 7;
+    int tubeVelocity = 15;
     int tubeOffset;
-    int[] tubesXpos = new int[tubeCount];
-    int[] tubeTopYpos = new int[tubeCount];
+
     //using objects
     //pipemanager handler pipe updates and other stuff
-    Bitmap bm = BitmapFactory.decodeResource(getResources(),R.drawable.pipe_bottomnew);
-    PipeManager pipeManager;
-    Random random;
-    //creating rectangles for collision detection
-    //deprecated
-    Rect tubeTopRect,tubeBotRect;
+    //PipeManager pipeManager;
+    PipeManager[] pipeManagers;
+
+
 
     public GameView(Context context) {
         super(context);
@@ -97,47 +90,25 @@ public class GameView extends View {
         background = new Background(getResources(),R.mipmap.background);
         background.setCollisionRect(new Rect(0,0,dWidth,dHeight));
 
-
-        //deprecated
-        tubeTop = BitmapFactory.decodeResource(getResources(),R.drawable.pipe_bottomnew);
-        tubeBottom=BitmapFactory.decodeResource(getResources(),R.drawable.pipe_bottomnew);
-        tubeTop = RotateBitmap(tubeTop,180);
-        tubeTop = Bitmap.createScaledBitmap(tubeTop,dWidth/4,dHeight,true);
-        tubeBottom = Bitmap.createScaledBitmap(tubeBottom,dWidth/4,dHeight,true);
-
         ground = new Ground(getResources(),R.drawable.ground);
         ground.setBitmap(Bitmap.createScaledBitmap(ground.getBitmap(),dWidth,400,true));
         ground.setCollisionRect(new Rect(0,dHeight-300,dWidth,dHeight));
 
-
         //set the birds bitmap and put him at the leftmost side and in the middle of the Y axis.
         bird = new Bird(getResources(),R.drawable.bird,dHeight);
 
-        //deprecated
-        tubeBotRect = new Rect(0,0,0,0);
-        tubeTopRect = new Rect(0,0,0,0);
-
-        //deprecated
         tubeOffset = dWidth;
-        //use this
 
         //tubes have variable length. set the min and max length here
-        //deprecated
         minTubeOffset = tubeGap/2;
         maxTubeOffset = dHeight - minTubeOffset - tubeGap;
 
-        //pipemanager
-        pipeManager = new PipeManager(getResources(),tubeGap,tubeGap/2,dHeight - minTubeOffset - tubeGap,tubeVelocity,dWidth,dHeight);
+        pipeManagers = new PipeManager[2];
+        pipeManagers[0]=new PipeManager(getResources(),tubeGap,tubeGap/2,dHeight - minTubeOffset - tubeGap,tubeVelocity,dWidth,dHeight);
+        pipeManagers[1]=new PipeManager(getResources(),tubeGap,tubeGap/2,dHeight - minTubeOffset - tubeGap,tubeVelocity,dWidth,dHeight);
 
-        //deprecated
-        random = new Random();
-        for(int i = 0; i < tubeCount; i++){
-            //start at the right edge of the screen
-            tubesXpos[i] = dWidth + i*tubeOffset;
-            tubeTopYpos[i] = minTubeOffset + random.nextInt(maxTubeOffset - minTubeOffset +1);
-        }
-        //pipemanager
-        pipeManager.reset(1);
+        pipeManagers[0].reset(1);
+        pipeManagers[1].reset(2);
 
         txtPaint = new Paint();
         plainFont = Typeface.create("Arial",Typeface.ITALIC);
@@ -148,7 +119,6 @@ public class GameView extends View {
         txtPaint.setTextSize(36);
 
     }
-
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -165,35 +135,12 @@ public class GameView extends View {
             if(bird.birdIsOnScreen(dHeight)){
                 bird.update();
             }
-
-            //set the position of the top pipe and draw it. X is the same as bottom pipe. Y is the top of the screen
-            //deprecated
-          //  for(int i=0;i<tubeCount;i++) {
-             //   tubesXpos[i] -= tubeVelocity;
-                //reset the tube, if it reaches the left end of the screen
-               // if(tubesXpos[i]<-tubeTop.getWidth()){
-                //    tubesXpos[i] += tubeCount * tubeOffset;
-               //     tubeTopYpos[i] = minTubeOffset + random.nextInt(maxTubeOffset - minTubeOffset +1);
-                 //   score.addScore();
-                //}
-
-                //deprecated
-                //the only random position is for top tube. The bottom tube depends on the top tube.
-                //canvas.drawBitmap(tubeTop, tubesXpos[i], tubeTopYpos[i] - tubeTop.getHeight(), null);
-                //use this
-                //pipemanager
-
-                //deprecated
-                //set the position of the bottom pipe and draw it. Y is
-
-                //canvas.drawBitmap(tubeBottom, tubesXpos[i], tubeTopYpos[i] + tubeGap, null);
-
-          //  }
-            //loop through pipemanagers, update and display
-            //pipemanager
-            pipeManager.update();
-            canvas.drawBitmap(pipeManager.getTopPipe().getBitmap(),pipeManager.getXpos(),pipeManager.getYpos()-pipeManager.getTopPipe().getHeight(),null);
-            canvas.drawBitmap(pipeManager.getBottomPipe().getBitmap(),pipeManager.getXpos(),pipeManager.getYpos()+pipeManager.getPipeGap(),null);
+            for(PipeManager pm:pipeManagers){
+                if(pm.isOffScreen()) score.addScore();
+                pm.update();
+                canvas.drawBitmap(pm.getTopPipe().getBitmap(),pm.getXpos(),pm.getYpos()-pm.getTopPipe().getHeight(),null);
+                canvas.drawBitmap(pm.getBottomPipe().getBitmap(),pm.getXpos(),pm.getYpos()+pm.getPipeGap(),null);
+            }
 
             if(CollisionDetection()){
                     gameOver();
@@ -202,7 +149,7 @@ public class GameView extends View {
         //display the bird
         canvas.drawBitmap(bird.getBitmap(),bird.getBirdXpos(),bird.getBirdYpos(),null);
 
-        // 50 is the offset, so the game is a bit easier. it means that 50pixels from each side wont count in collision calculation
+        // 30 is the offset, so the game is a bit easier. it means that 50pixels from each side wont count in collision calculation
         bird.setCollisionRect(30);
         //canvas.drawBitmap(ground,0,dHeight-350,null);
         canvas.drawBitmap(ground.getBitmap(),0,dHeight-ground.getHeight()+50,null);
@@ -235,32 +182,19 @@ public class GameView extends View {
         handler.removeCallbacksAndMessages(null);
         handler = null;
     }
-    public static Bitmap RotateBitmap(Bitmap source, float angle)
-    {
-        Matrix matrix = new Matrix();
-        matrix.postRotate(angle);
-        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
-    }
+
     public boolean CollisionDetection(){
         //deprecated. call Assets check for collisions
-       // for(int i = 0;i<tubeCount;i++) {
+
             //collides with the ground
-            if(bird.checkForCollisions(ground.getCollisionRect())) return true;
+        for(PipeManager pm:pipeManagers){
             //collides with the bottom pipe
-            if(bird.checkForCollisions(pipeManager.getBottomPipe().getCollisionRect())) return true;
+            if(bird.checkForCollisions(pm.getBottomPipe().getCollisionRect())) return true;
             //collides with the top pipe
-            if(bird.checkForCollisions(pipeManager.getTopPipe().getCollisionRect())) return true;
+            if(bird.checkForCollisions(pm.getTopPipe().getCollisionRect())) return true;
+        }
 
-            //using rectangles
-           /* tubeTopRect.set(tubesXpos[i],0,tubesXpos[i]+tubeTop.getWidth(),tubeTopYpos[i]);
-
-            tubeBotRect.set(tubesXpos[i],tubeTopYpos[i]+tubeGap,tubesXpos[i]+tubeBottom.getWidth(),dHeight);
-            if(Rect.intersects(bird.getCollisionRect(),tubeBotRect) || Rect.intersects(bird.getCollisionRect(),tubeTopRect) || Rect.intersects(bird.getCollisionRect(),ground.getCollisionRect())){
-                return true;
-            }*/
-
-
-        //}
+            if(bird.checkForCollisions(ground.getCollisionRect())) return true;
 
         return false;
     }

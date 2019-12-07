@@ -16,6 +16,7 @@ public class PipeManager {
     Random random;
     BottomPipe bottomPipe;
     TopPipe topPipe;
+    Score score;
 
     PipeManager(Resources resources,int pipeGap,int minTubeOffset,int maxTubeOffset, int pipeVelocity,int dWidth, int dHeight){
         //pipe settings
@@ -26,7 +27,8 @@ public class PipeManager {
         this.setPipeOffset(dWidth);
         this.dWidth = dWidth;
         this.dHeight = dHeight;
-        //inicialize the pipes
+        //inicialize the objects
+        this.score = new Score();
         this.bottomPipe = new BottomPipe(resources,R.drawable.pipe_bottomnew);
         this.topPipe = new TopPipe(resources,R.drawable.pipe_bottomnew);
         this.topPipe.scaleBitmap(dWidth/4,dHeight);
@@ -36,19 +38,15 @@ public class PipeManager {
         this.random = new Random();
 
     }
-    public void drawPipes(Canvas canvas){
 
-    }
     public void update() {
     //update top and bottom pipes
         this.setXpos(this.getXpos()-pipeVelocity);
         if(isOffScreen()){
-            this.reset(1);
+            this.setXpos((2*getPipeOffset()) - getTopPipe().getWidth());
+            this.setYpos(minTubeOffset+random.nextInt(maxTubeOffset-minTubeOffset+1));
         }
         updateRectangles();
-        //bottomPipe.update(topPipe);
-        //topPipe.update();
-        //dont fortget to update the rectangles
     }
     public void updateRectangles(){
         this.bottomPipe.setCollisionRect( new Rect( getXpos(),getYpos()+getPipeGap(),getXpos()+bottomPipe.getWidth(),dHeight ) );
@@ -56,14 +54,15 @@ public class PipeManager {
     }
     public boolean isOffScreen(){
 
-        if(this.getXpos()<(-topPipe.getWidth())){
+        if(this.getXpos() < -topPipe.getWidth()){
+            score.addScore();
             return true;
         }
         return false;
     }
-    public void reset(int offsetMultiplier){
 
-        this.setXpos(offsetMultiplier*pipeOffset+topPipe.getWidth());
+    public void reset(int offsetMultiplier){
+        this.setXpos((getPipeOffset()*offsetMultiplier));
         this.setYpos(minTubeOffset+random.nextInt(maxTubeOffset-minTubeOffset+1));
         this.topPipe.setCollisionRect(new Rect(0,0,0,0));
         this.bottomPipe.setCollisionRect(new Rect(0,0,0,0));
@@ -71,6 +70,14 @@ public class PipeManager {
 
     public BottomPipe getBottomPipe() {
         return bottomPipe;
+    }
+
+    public Score getScore() {
+        return score;
+    }
+
+    public void setScore(Score score) {
+        this.score = score;
     }
 
     public TopPipe getTopPipe() {
