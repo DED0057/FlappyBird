@@ -50,16 +50,21 @@ public class GameView extends View {
     //device width and height
     int dWidth, dHeight;
     //declaration for the bird bitmap
-    Bitmap[] birds;
+   // Bitmap[] birds;
+    Bird bird;
     //temp variable to store bird state (wings down/up)
-    int birdState = 0;
-    int birdStateCounter=0;
-    boolean birdWingsUp=false;
+    //deprecated
+    //int birdState = 0;
+    //deprecated
+    //int birdStateCounter=0;
+    //deprecated
+    //boolean birdWingsUp=false;
 
     //physics variables
-    int velocity=0,gravity=3;
+   // int velocity=0,gravity=3;
     //storing the birds position
-    int birdXpos,birdYpos;
+    //deprecated
+   // int birdXpos,birdYpos;
     boolean gameState = false;
     //setting the gab between the top and bottom tube
     int tubeGap = 400;
@@ -73,7 +78,9 @@ public class GameView extends View {
     int maxScore=0;
 
     //creating rectangles for collision detection
-    Rect birdRect,tubeTopRect,tubeBotRect, groundRect;
+    //deprecated
+    Rect tubeTopRect,tubeBotRect, groundRect;
+    //Rect birdRect;
 
     public GameView(Context context) {
         super(context);
@@ -106,18 +113,9 @@ public class GameView extends View {
         ground = Bitmap.createScaledBitmap(ground,dWidth,400,true);
         //initializing rectangle corresponding to the display dimensions
         rect = new Rect(0,0,dWidth,dHeight);
-        //create 5 states of bird (seamless animation)
-        birds = new Bitmap[5];
-        birds[0] = BitmapFactory.decodeResource(getResources(),R.drawable.blue_bird_wingsup_scaleddown);
-        birds[1] = BitmapFactory.decodeResource(getResources(),R.drawable.blue_bird_wingsup3);
-        birds[2] = BitmapFactory.decodeResource(getResources(),R.drawable.blue_bird_wingsup2);
-        birds[3] = BitmapFactory.decodeResource(getResources(),R.drawable.blue_bird_wingsup1);
-        birds[4] = BitmapFactory.decodeResource(getResources(),R.drawable.blue_bird_scaleddown);
+        //set the birds bitmap and put him at the leftmost side and in the middle of the Y axis.
+        bird = new Bird(getResources(),R.drawable.bird,dHeight);
 
-        //set the bird in the middle of the screen
-        birdXpos = 1;
-        birdYpos = dHeight/2 - birds[1].getHeight()/2;
-        birdRect=new Rect(birdXpos,birdYpos,birdXpos+birds[0].getWidth(),birdYpos+birds[0].getHeight());
         groundRect = new Rect(0,dHeight-300,dWidth,dHeight);
         tubeBotRect = new Rect(0,0,0,0);
         tubeTopRect = new Rect(0,0,0,0);
@@ -153,30 +151,13 @@ public class GameView extends View {
         canvas.drawBitmap(background,null,rect,null);
         canvas.drawText("Score:"+maxScore+is_paused(),(float)(dWidth/2.0),(float)100.00,txtPaint);
         handler.postDelayed(runnable,UPDATE_MILIS);
-        //do{handler.postDelayed(runnable,UPDATE_MILIS);}while(is_paused()!=true);
-
-        //switch between bird images between every display update
-        //creating bird flight animation
-        birdState=birdStateCounter;
-        if(birdStateCounter==4){
-            birdWingsUp=true;
-        }
-        if(birdStateCounter==0){
-            birdWingsUp=false;
-        }
-        if(birdWingsUp){
-            birdStateCounter--;
-        }else{
-            birdStateCounter++;
-        }
 
         if(gameState){
 
-            if((birdYpos< dHeight - birds[0].getHeight() ) || velocity<0 ){
-                //let the bird fall with incremental speed
-                velocity += gravity;
-                birdYpos += velocity;
+            if(bird.birdIsOnScreen(dHeight)){
+                bird.update();
             }
+
             //set the position of the top pipe and draw it. X is the same as bottom pipe. Y is the top of the screen
             for(int i=0;i<tubeCount;i++) {
                 tubesXpos[i] -= tubeVelocity;
@@ -193,15 +174,14 @@ public class GameView extends View {
 
             }
             if(CollisionDetection()){
-
                     gameOver();
-
             }
         }
         //display the bird
-        canvas.drawBitmap(birds[birdState],birdXpos,birdYpos,null);
-        birdRect.set(birdXpos+50,birdYpos,birdXpos+birds[0].getWidth()-50,birdYpos+birds[0].getHeight()-50);
+        canvas.drawBitmap(bird.getBitmap(),bird.getBirdXpos(),bird.getBirdYpos(),null);
 
+        // 50 is the offset, so the game is a bit easier. it means that 50pixels from each side wont count in collision calculation
+        bird.setCollisionRect(10);
         canvas.drawBitmap(ground,0,dHeight-350,null);
 
     }
@@ -212,14 +192,16 @@ public class GameView extends View {
         if(action == MotionEvent.ACTION_DOWN){
             //make the bird jump by 30 units up
             gameState = true;
-            velocity = -30;
+            //deprecated
+            //velocity = -30;
+            //use this instead
+            bird.setVelocity(-30);
         }
         //return true when user inputs touch event
 
         return true;
-
-
     }
+
     public void gameOver() {
 
         Log.d("Game Over","PROHRAL JSI");
@@ -231,9 +213,6 @@ public class GameView extends View {
         getContext().startActivity(myInt);
         handler.removeCallbacksAndMessages(null);
         handler = null;
-
-
-
     }
     public static Bitmap RotateBitmap(Bitmap source, float angle)
     {
@@ -242,14 +221,14 @@ public class GameView extends View {
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
     }
     public boolean CollisionDetection(){
-
+        //deprecated. call Assets check for collisions
         for(int i = 0;i<tubeCount;i++) {
 
             //using rectangles
             tubeTopRect.set(tubesXpos[i],0,tubesXpos[i]+tubeTop.getWidth(),tubeTopYpos[i]);
 
             tubeBotRect.set(tubesXpos[i],tubeTopYpos[i]+tubeGap,tubesXpos[i]+tubeBottom.getWidth(),dHeight);
-            if(Rect.intersects(birdRect,tubeBotRect) || Rect.intersects(birdRect,tubeTopRect) || Rect.intersects(birdRect,groundRect)){
+            if(Rect.intersects(bird.getCollisionRect(),tubeBotRect) || Rect.intersects(bird.getCollisionRect(),tubeTopRect) || Rect.intersects(bird.getCollisionRect(),groundRect)){
                 return true;
             }
 
