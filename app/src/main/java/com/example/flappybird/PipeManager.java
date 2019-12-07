@@ -44,10 +44,14 @@ public class PipeManager {
         this.setXpos(this.getXpos()-pipeVelocity);
         if(isOffScreen()){
             this.setXpos((2*getPipeOffset()) - getTopPipe().getWidth());
-            this.setYpos(minTubeOffset+random.nextInt(maxTubeOffset-minTubeOffset+1));
+            this.setYpos((minTubeOffset)+random.nextInt(maxTubeOffset-minTubeOffset+1));
         }
         updateRectangles();
     }
+
+    /**
+     * update the rectangles around pipes which are used when calculation collisions
+     */
     public void updateRectangles(){
         this.bottomPipe.setCollisionRect( new Rect( getXpos(),getYpos()+getPipeGap(),getXpos()+bottomPipe.getWidth(),dHeight ) );
         this.topPipe.setCollisionRect( new Rect( getXpos(),0,getXpos()+topPipe.getWidth(),getYpos() ) );

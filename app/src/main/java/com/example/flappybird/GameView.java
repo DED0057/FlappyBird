@@ -38,9 +38,10 @@ public class GameView extends View {
 
     private static boolean pause_flg = false;
     public static boolean gameActive = false;
-
+    static boolean gameover=false;
     Handler handler;
     Runnable runnable;
+    Runnable runnable2;
     Paint txtPaint;
     Typeface plainFont;
     Typeface boldFont;
@@ -57,13 +58,12 @@ public class GameView extends View {
     boolean gameState = false;
 
     //setting the gap between the top and bottom tube
-    int tubeGap = 400;
+    int tubeGap = 350;
     int minTubeOffset,maxTubeOffset;
     int tubeVelocity = 15;
     int tubeOffset;
 
-    //using objects
-    //pipemanager handler pipe updates and other stuff
+    //pipemanager handles pipe updates and other stuff
     //PipeManager pipeManager;
     PipeManager[] pipeManagers;
 
@@ -71,6 +71,7 @@ public class GameView extends View {
 
     public GameView(Context context) {
         super(context);
+
         handler= new Handler();
         runnable = new Runnable() {
             @Override
@@ -80,6 +81,13 @@ public class GameView extends View {
                 invalidate();
             }
         };
+        runnable2 = new Runnable() {
+            @Override
+            public void run() {
+                if(CollisionDetection()) gameover=true;
+            }
+        };
+
         score = new Score();
         display = ((Activity)getContext()).getWindowManager().getDefaultDisplay();
         point = new Point();
@@ -92,20 +100,20 @@ public class GameView extends View {
 
         ground = new Ground(getResources(),R.drawable.ground);
         ground.setBitmap(Bitmap.createScaledBitmap(ground.getBitmap(),dWidth,400,true));
-        ground.setCollisionRect(new Rect(0,dHeight-300,dWidth,dHeight));
+        ground.setCollisionRect(new Rect(0,dHeight-200,dWidth,dHeight));
 
         //set the birds bitmap and put him at the leftmost side and in the middle of the Y axis.
-        bird = new Bird(getResources(),R.drawable.bird,dHeight);
+        bird = new Bird(getResources(),R.drawable.bird,R.drawable.birdfalling,dHeight);
 
         tubeOffset = dWidth;
 
         //tubes have variable length. set the min and max length here
         minTubeOffset = tubeGap/2;
-        maxTubeOffset = dHeight - minTubeOffset - tubeGap;
+        maxTubeOffset = dHeight-(minTubeOffset + tubeGap);
 
         pipeManagers = new PipeManager[2];
-        pipeManagers[0]=new PipeManager(getResources(),tubeGap,tubeGap/2,dHeight - minTubeOffset - tubeGap,tubeVelocity,dWidth,dHeight);
-        pipeManagers[1]=new PipeManager(getResources(),tubeGap,tubeGap/2,dHeight - minTubeOffset - tubeGap,tubeVelocity,dWidth,dHeight);
+        pipeManagers[0]=new PipeManager(getResources(),tubeGap,minTubeOffset,maxTubeOffset,tubeVelocity,dWidth,dHeight);
+        pipeManagers[1]=new PipeManager(getResources(),tubeGap,minTubeOffset,maxTubeOffset,tubeVelocity,dWidth,dHeight);
 
         pipeManagers[0].reset(1);
         pipeManagers[1].reset(2);
@@ -123,13 +131,12 @@ public class GameView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        gameActive = true;
         Paint bgpaint = new Paint();
         bgpaint.setColor(Color.BLACK);
         canvas.drawBitmap(background.getBitmap(),null,background.getCollisionRect(),null);
-
         handler.postDelayed(runnable,UPDATE_MILIS);
-
+        handler.postDelayed(runnable2,UPDATE_MILIS);
+        if(gameover) gameOver();
         if(gameState){
 
             if(bird.birdIsOnScreen(dHeight)){
@@ -142,16 +149,16 @@ public class GameView extends View {
                 canvas.drawBitmap(pm.getBottomPipe().getBitmap(),pm.getXpos(),pm.getYpos()+pm.getPipeGap(),null);
             }
 
-            if(CollisionDetection()){
-                    gameOver();
-            }
         }
         //display the bird
-        canvas.drawBitmap(bird.getBitmap(),bird.getBirdXpos(),bird.getBirdYpos(),null);
-
+        if(bird.isFalling() && bird.getVelocity()>5){
+            canvas.drawBitmap(bird.getBackup(),bird.getBirdXpos(),bird.getBirdYpos(),null);
+        }
+            else{
+            canvas.drawBitmap(bird.getBitmap(), bird.getBirdXpos(), bird.getBirdYpos(), null);
+        }
         // 30 is the offset, so the game is a bit easier. it means that 50pixels from each side wont count in collision calculation
         bird.setCollisionRect(30);
-        //canvas.drawBitmap(ground,0,dHeight-350,null);
         canvas.drawBitmap(ground.getBitmap(),0,dHeight-ground.getHeight()+50,null);
         canvas.drawText("Score:"+score.getCurrentScore(),(float)(dWidth/2.0),(float)100.00,txtPaint);
     }
@@ -163,7 +170,7 @@ public class GameView extends View {
         if(action == MotionEvent.ACTION_DOWN){
             //make the bird jump by 30 units up
             gameState = true;
-            bird.setVelocity(-30);
+            bird.makeJump();
         }
         //return true when user inputs touch event
 
@@ -184,8 +191,6 @@ public class GameView extends View {
     }
 
     public boolean CollisionDetection(){
-        //deprecated. call Assets check for collisions
-
             //collides with the ground
         for(PipeManager pm:pipeManagers){
             //collides with the bottom pipe

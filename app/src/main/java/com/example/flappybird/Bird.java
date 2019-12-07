@@ -3,6 +3,10 @@ package com.example.flappybird;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.util.Log;
+
+import java.util.ArrayList;
+
 /*
 *this class represents the player (bird). It extends the assets class ,which means it has it's own bitmap.
 * */
@@ -12,40 +16,41 @@ public class Bird extends Assets {
     private boolean wingsUp;
     private static int velocity;
     private static int gravity;
+
+
     //set a variable to control the animation. Bird rotates down when it's falling
     private boolean isFalling;
     //constructor calling the Assets constructor and initializing the birds position.
-    Bird(Resources resources, int filepath,int xpos, int ypos) {
-        super(resources, filepath);
-        this.birdXpos = xpos;
-        this.birdYpos = ypos;
-        this.setCollisionRect();
-        velocity = 0;
-        gravity = 3;
-        isFalling = false;
-    }
-    //1,(dHeight/2 - birds[1].getHeight()/2)
-    Bird(Resources resources, int filepath,int dHeight) {
-        super(resources, filepath);
+
+
+    Bird(Resources resources, int filepath,int filepath2,int dHeight) {
+        super(resources, filepath,filepath2);
+       // this.rotate(45);
         this.birdXpos = 1;
         //put the bird in the middle of the Y axis
         this.birdYpos = ( (dHeight/2) - (this.getBitmap().getHeight()/2) );
         this.setCollisionRect();
         velocity = 0;
         gravity = 3;
-        isFalling = false;
+        isFalling=false;
     }
 
     public void update() {
-        //TODO update the xpos+ypos of the bird
+        //bird is falling - make him rotate down
+        Log.d("birdX:","x:"+getBirdXpos());
+
         this.setVelocity(this.getVelocity()+this.getGravity());
         this.birdYpos = this.birdYpos + this.getVelocity();
-
+        isFalling=true;
     }
 
+    public boolean isFalling() {
+        return isFalling;
+    }
 
-    public void reset() {
-
+    public void makeJump() {
+        setVelocity(-30);
+        isFalling=false;
     }
 
     public int getBirdXpos(){
