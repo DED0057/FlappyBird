@@ -155,7 +155,6 @@ public class GameView extends View {
                 bird.update();
             }
             for(PipeManager pm:pipeManagers){
-                if(pm.isOffScreen()) score.addScore();
                 pm.update();
                 canvas.drawBitmap(pm.getTopPipe().getBitmap(),pm.getXpos(),pm.getYpos()-pm.getTopPipe().getHeight(),null);
                 canvas.drawBitmap(pm.getBottomPipe().getBitmap(),pm.getXpos(),pm.getYpos()+pm.getPipeGap(),null);
@@ -194,7 +193,13 @@ public class GameView extends View {
      */
     public void gameOver() {
 
-        Log.d("Game Over","PROHRAL JSI");
+
+        for(PipeManager pm:pipeManagers){
+            //check if there is a pipe behind the player that hasn't been reset yet. add score if there is
+            if(pm.getXpos()+pm.getBottomPipe().getWidth() <bird.getBirdXpos()){
+                score.addScore();
+            }
+        }
         //display game over screen with score
         gameState=false;
         Intent myInt = new Intent(getContext(),MainActivity.class);

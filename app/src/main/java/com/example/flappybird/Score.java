@@ -22,7 +22,6 @@ public class Score {
     private static int currentScore;
     Score(){
         currentScore =0;
-
     }
 
     /**

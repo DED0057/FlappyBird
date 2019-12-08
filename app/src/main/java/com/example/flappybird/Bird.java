@@ -37,7 +37,7 @@ public class Bird extends Assets {
     Bird(Resources resources, int filepath,int filepath2,int dHeight) {
         super(resources, filepath,filepath2);
        // this.rotate(45);
-        this.birdXpos = 1;
+        this.birdXpos = 100;
         //put the bird in the middle of the Y axis
         this.birdYpos = ( (dHeight/2) - (this.getBitmap().getHeight()/2) );
         this.setCollisionRect();
@@ -51,7 +51,7 @@ public class Bird extends Assets {
      */
     public void update() {
         //bird is falling - make him rotate down
-        Log.d("birdX:","x:"+getBirdXpos());
+        Log.d("birdY:","y:"+getBirdYpos());
 
         this.setVelocity(this.getVelocity()+this.getGravity());
         this.birdYpos = this.birdYpos + this.getVelocity();
